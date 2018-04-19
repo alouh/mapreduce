@@ -1,12 +1,12 @@
 package temperature;
 
+import hdfs.HdfsCommand;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
-
-import javax.xml.soap.Text;
 
 /**
  * @Author: JF Han
@@ -15,19 +15,27 @@ import javax.xml.soap.Text;
  */
 public class MaxTemperature {
 
+    private final static String HDFS_URL = "hdfs://Master:9000";
+
+    private final static String FILE_PATH = "E:/ftp/weather";
+
     public static void main(String... args) throws Exception {
 
-        if (args.length != 2) {
-            System.err.println("用法:MaxTemperature <输入路径> <输出路径>");
-            System.exit(-1);
-        }
-
-        Job job = new Job();
+        Job job = Job.getInstance();
         job.setJarByClass(MaxTemperature.class);
         job.setJobName("Max temperature");
 
-        FileInputFormat.addInputPath(job, new Path(args[0]));
-        FileOutputFormat.setOutputPath(job, new Path(args[1]));
+        String inputPath = HDFS_URL + "/user/mapreduce/temperature";
+        String outputPath = inputPath + "/output";
+
+        HdfsCommand hdfsCommand = new HdfsCommand(HDFS_URL, job.getConfiguration());
+        hdfsCommand.rmr(inputPath);
+        hdfsCommand.mkdirs(inputPath);
+        hdfsCommand.copyFile(FILE_PATH + "/1901", inputPath);
+        hdfsCommand.copyFile(FILE_PATH + "/1902", inputPath);
+
+        FileInputFormat.addInputPath(job, new Path(inputPath));
+        FileOutputFormat.setOutputPath(job, new Path(outputPath));
 
         job.setMapperClass(MaxTemperatureMapper.class);
         job.setReducerClass(MaxTemperatureReducer.class);
