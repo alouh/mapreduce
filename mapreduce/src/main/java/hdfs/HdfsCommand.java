@@ -34,16 +34,9 @@ public class HdfsCommand {
         this.conf = conf;
     }
 
-    public static void main(String[] args) throws IOException {
-        JobConf conf = config();
-        HdfsCommand hdfs = new HdfsCommand(conf);
-        hdfs.copyFile("datafile/item.csv", "/tmp/new");
-        hdfs.ls("/tmp/new");
-    }
-
     public static JobConf config() {
         JobConf conf = new JobConf(HdfsCommand.class);
-        conf.setJobName("HdfsDAO");
+        conf.setJobName("HdfsCommand");
         return conf;
     }
 
